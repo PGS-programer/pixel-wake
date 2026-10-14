@@ -1,0 +1,73 @@
+// Optional QA dependency: Playwright, installed separately from the game runtime.
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const root = process.env.PIXEL_WAKE_URL || 'http://127.0.0.1:8080';
+const out = process.env.QA_OUTPUT_DIR || '/tmp/pixel-wake-online-shots'; fs.mkdirSync(out, { recursive: true });
+(async () => {
+    const browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
+    const errors = [];
+    const make = async (opts = {}) => { const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...opts }); const p = await ctx.newPage(); p.on('pageerror', e => { errors.push(e.message); console.error(e.message); }); return p; };
+    const active = (p, key) => p.waitForFunction(key => window.__PIXEL_WAKE__?.scene.isActive(key), key);
+    const clickCanvas = async (p, x, y) => { const r = await p.locator('canvas').boundingBox(); await p.mouse.click(r.x + x * r.width / 960, r.y + y * r.height / 540); };
+    const profile = async (p, name) => { await p.goto(root); await active(p, 'ProfileScene'); await p.getByLabel('NOMBRE DE JUGADOR').fill(name); await p.getByRole('button', { name: 'CONTINUAR' }).click(); await active(p, 'MenuScene'); await p.waitForFunction(async () => (await import('/src/game/services/player.js')).syncStatus() === 'online'); };
+    const host = await make(), guest = await make();
+    await host.addInitScript(() => { if (!localStorage.getItem('__qaSeeded')) { localStorage.setItem('__qaSeeded', '1'); localStorage.setItem('pixelWakeHighScore', '500'); localStorage.setItem('pixelWakeBestPoints', '2000'); localStorage.setItem('pixelWakeCoins', '75'); localStorage.setItem('pixelWakeUnlockedBoats', '["coastal","riptide"]'); localStorage.setItem('pixelWakeSelectedBoat', 'riptide'); } });
+    await host.goto(root); await active(host, 'ProfileScene'); await host.getByLabel('NOMBRE DE JUGADOR').fill('<script>'); await host.getByRole('button', { name: 'CONTINUAR' }).click(); assert.ok(await host.locator('[role=status]').textContent());
+    await host.getByLabel('NOMBRE DE JUGADOR').fill('POL_QA'); await host.getByRole('button', { name: 'CONTINUAR' }).click(); await active(host, 'MenuScene');
+    await host.waitForFunction(async () => (await import('/src/game/services/player.js')).syncStatus() === 'online');
+    const migrated = await host.evaluate(async () => (await import('/src/game/services/player.js')).getPlayer()); assert.equal(migrated.coins, 75); assert.equal(migrated.bestScore, 2000); assert.equal(migrated.selectedBoat, 'riptide');
+    await host.reload(); await active(host, 'MenuScene'); assert.ok(await host.getByText('Bienvenido a bordo, POL_QA.').count());
+    await host.getByRole('button', { name: 'RANKING', exact: true }).click(); await active(host, 'RankingScene'); await host.waitForSelector('tbody tr'); assert.ok((await host.locator('tbody').textContent()).includes('POL_QA'));
+    await host.getByRole('button', { name: 'DISTANCIA', exact: true }).click(); await host.waitForSelector('tbody tr'); await host.screenshot({ path: out + '/ranking.png' }); await host.getByRole('button', { name: 'VOLVER' }).click();
+    await host.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); await active(host, 'GameScene');
+    await host.evaluate(() => { window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y = 225; });
+    await host.waitForTimeout(2400); assert.equal(await host.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').isGameOver), false);
+    assert.ok(await host.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').runCoins) >= 2);
+    await host.keyboard.press('p', { delay: 60 }); assert.equal(await host.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').isPaused), true); await host.keyboard.press('p', { delay: 60 });
+    await host.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').triggerGameOver()); await host.waitForTimeout(160); await host.keyboard.press('m', { delay: 60 }); await active(host, 'MenuScene');
+    await host.getByRole('button', { name: 'GARAJE', exact: true }).click(); await active(host, 'GarageScene'); await clickCanvas(host, 591, 380); assert.equal(await host.evaluate(() => localStorage.getItem('pixelWakeSelectedBoat')), 'marlin'); await clickCanvas(host, 133, 505); await active(host, 'MenuScene');
+    await profile(guest, 'MARC_QA');
+    await host.getByRole('button', { name: 'MULTIJUGADOR', exact: false }).click(); await host.getByRole('button', { name: 'CREAR SALA', exact: true }).click(); await host.getByLabel('NOMBRE DE SALA').fill('Travesía QA'); await host.getByLabel('CONTRASEÑA').fill('ocean7'); await host.getByRole('button', { name: 'CREAR SALA', exact: true }).last().click(); await active(host, 'LobbyScene');
+    const code = await host.evaluate(async () => (await import('/src/game/multiplayer/network.js')).network.room.code);
+    await guest.getByRole('button', { name: 'MULTIJUGADOR', exact: false }).click(); await guest.getByRole('button', { name: 'UNIRSE A SALA', exact: true }).click(); await guest.getByLabel('CÓDIGO DE SALA').fill(code); await guest.getByLabel('CONTRASEÑA').fill('wrong'); await guest.getByRole('button', { name: 'UNIRSE', exact: true }).click(); await guest.getByText('Contraseña incorrecta.', { exact: true }).waitFor();
+    await guest.getByLabel('CONTRASEÑA').fill('ocean7'); await guest.getByRole('button', { name: 'UNIRSE', exact: true }).click(); await active(guest, 'LobbyScene');
+    await host.getByRole('button', { name: 'ESTOY LISTO' }).click(); await guest.getByRole('button', { name: 'ESTOY LISTO' }).click(); await host.getByText(/JUGADOR 2.*LISTO/).waitFor(); await host.screenshot({ path: out + '/lobby.png' });
+    await host.getByRole('button', { name: 'INICIAR PARTIDA' }).click(); await Promise.all([active(host, 'MultiplayerGameScene'), active(guest, 'MultiplayerGameScene')]);
+    await host.waitForFunction(() => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state?.players.length === 2);
+    const seeds = await Promise.all([host, guest].map(p => p.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state.seed))); assert.equal(seeds[0], seeds[1]);
+    await host.keyboard.down('ArrowDown'); await host.waitForTimeout(230); await host.keyboard.up('ArrowDown');
+    await host.waitForFunction(() => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state.bump > 0);
+    await host.screenshot({ path: out + '/multiplayer.png' });
+    // Steer one real player into the opening rock while the other remains safe.
+    await host.evaluate(async () => { const n = (await import('/src/game/multiplayer/network.js')).network; const scene = window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene'); scene.touchTarget = 270; });
+    await host.waitForFunction(() => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state?.result !== null, { timeout: 10000 });
+    const result = await host.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state.result); assert.ok(result);
+    await guest.getByRole('button', { name: 'REVANCHA' }).waitFor(); await host.getByRole('button', { name: 'REVANCHA' }).click(); await guest.getByRole('button', { name: 'REVANCHA' }).click();
+    await host.waitForFunction(seed => window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').state?.seed !== seed && !window.__PIXEL_WAKE__.scene.getScene('MultiplayerGameScene').finished, seeds[0]);
+    await guest.context().close(); await host.getByText('El rival se ha desconectado.', { exact: true }).waitFor();
+    await host.getByRole('button', { name: 'SALIR', exact: true }).click(); await active(host, 'MenuScene');
+    const player = await host.evaluate(async () => (await import('/src/game/services/player.js')).getPlayer()); assert.ok(player.wins + player.losses >= 2);
+    await host.getByRole('button', { name: 'PERFIL', exact: true }).click(); await active(host, 'ProfileScene'); await host.screenshot({ path: out + '/profile.png' });
+    const mobile = await make({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }); await profile(mobile, 'NORA_QA');
+    await mobile.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); assert.equal(await mobile.evaluate(() => window.__PIXEL_WAKE__.scene.isActive('GameScene')), false); await mobile.getByText(/GIRA EL DISPOSITIVO/).waitFor();
+    await mobile.screenshot({ path: out + '/mobile-menu.png' }); await mobile.getByRole('button', { name: 'GARAJE', exact: true }).click(); await active(mobile, 'GarageScene'); assert.equal(await mobile.getByRole('button', { name: 'SELECCIONADO', exact: false }).count(), 1); await mobile.getByRole('button', { name: 'VOLVER' }).click();
+    await mobile.setViewportSize({ width: 844, height: 390 }); await mobile.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); await active(mobile, 'GameScene');
+    const up = mobile.getByRole('button', { name: 'Subir', exact: true }); const box = await up.boundingBox();
+    const cdp = await mobile.context().newCDPSession(mobile); await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: box.x + 30, y: box.y + 30 }] }); await mobile.waitForTimeout(160); await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    assert.ok(await mobile.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y < 250)); await mobile.screenshot({ path: out + '/mobile-game.png' });
+    await mobile.setViewportSize({ width: 390, height: 844 }); await mobile.locator('.rotate-cover:not([hidden])').waitFor(); assert.equal(await mobile.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').isPaused), true);
+    // Offline fallback is tested in a separate context with every API request blocked.
+    const offline = await make(); await offline.route('**/api/**', route => route.abort()); await offline.goto(root); await active(offline, 'ProfileScene'); await offline.getByLabel('NOMBRE DE JUGADOR').fill('OFFLINE'); await offline.getByRole('button', { name: 'CONTINUAR' }).click(); await active(offline, 'MenuScene'); await offline.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); await active(offline, 'GameScene'); await offline.evaluate(() => { window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y = 225; }); await offline.waitForTimeout(500); assert.ok(await offline.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').distance > 0));
+    if (process.env.PIXEL_WAKE_PROD_URL) {
+        const production = await make(); const failed = [];
+        production.on('response', response => { if (response.status() >= 400) failed.push(response.url()); });
+        await production.goto(process.env.PIXEL_WAKE_PROD_URL);
+        await production.getByLabel('NOMBRE DE JUGADOR').fill('PROD_QA'); await production.getByRole('button', { name: 'CONTINUAR' }).click();
+        await production.getByRole('button', { name: 'RANKING', exact: true }).click(); await production.waitForSelector('tbody tr');
+        assert.equal(await production.evaluate(() => typeof window.__PIXEL_WAKE__), 'undefined');
+        await production.screenshot({ path: out + '/production-ranking.png' }); assert.deepEqual(failed, []);
+    }
+    assert.deepEqual(errors, []); console.log(JSON.stringify({ status: 'PASS', migrated: { coins: migrated.coins, selectedBoat: migrated.selectedBoat, bestScore: migrated.bestScore }, stats: { wins: player.wins, losses: player.losses }, checks: ['profile validation', 'migration', 'reload', 'ranking both metrics', 'single player', 'pause', 'garage', 'password error', 'two sessions lobby', 'same seed', 'real input', 'push', 'result', 'rematch', 'disconnect', 'win-loss', 'portrait menus', 'orientation gate', 'touch buttons', 'rotation pause', 'offline single player'], errors }, null, 2));
+    await browser.close();
+})().catch(e => { console.error(e); process.exit(1); });

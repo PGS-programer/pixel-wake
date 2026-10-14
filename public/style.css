@@ -1,0 +1,45 @@
+:root { color-scheme: dark; background: #061f28; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { background: radial-gradient(ellipse at center, #16454b, #061f28 75%); }
+#app { width: 100%; height: 100vh; height: 100dvh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#game-container { width: 100%; height: 100%; }
+canvas { display: block; image-rendering: pixelated; touch-action: none; box-shadow: 0 20px 80px #0005; }
+.orientation-hint { display: none; }
+@media (max-width: 600px) and (orientation: portrait) {
+    .orientation-hint { display: block; position: fixed; top: max(24px, env(safe-area-inset-top)); left: 20px; right: 20px; text-align: center; color: #a5d8d1; font: 14px/1.5 monospace; pointer-events: none; }
+}
+/* DOM menus remain readable in portrait and with the mobile keyboard open. */
+#app { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.ui-screen { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: #061f28b8; overflow: auto; font: 16px/1.4 monospace; color: #fff4d9; }
+.ui-card { width: min(100%, 650px); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; border: 1px solid #638f8d; border-top: 4px solid #ffd166; background: #092c37f7; padding: 22px; box-shadow: 5px 7px 0 #03141c88; }
+.menu-screen { justify-content: flex-start; background: transparent; pointer-events: none; }
+.menu-screen .ui-card { width: min(440px, 100%); pointer-events: auto; }
+.ui-card h1 { margin: 0 0 6px; font-size: clamp(24px, 4vw, 36px); line-height: 1.15; color: #ffd166; }
+.ui-card h2 { margin: 0 0 6px; font-size: 18px; }
+.ui-card p { margin: 10px 0; }
+.eyebrow { font-size: 11px; color: #46dfc1; margin-bottom: 10px; }
+.muted, .small { color: #a5c9c6; }
+.small { font-size: 12px; overflow-wrap: anywhere; }
+.ui-card button { width: 100%; min-height: 46px; padding: 10px 12px; margin: 5px 0; border: 1px solid #638f8d; border-radius: 0; background: #164a53; color: #fff4d9; font: bold 16px/1.2 monospace; cursor: pointer; touch-action: manipulation; }
+.ui-card button:hover { background: #22616a; }
+.ui-card button:focus-visible, .ui-card input:focus-visible { outline: 3px solid #46dfc1; outline-offset: 2px; }
+.ui-card button.primary { background: #ffd166; color: #092c37; border-color: #ffd166; }
+.ui-card button:disabled { opacity: .5; cursor: wait; }
+.ui-card label { display: block; font-size: 13px; color: #a5d8d1; margin: 14px 0; }
+.ui-card input { display: block; width: 100%; min-height: 46px; margin-top: 6px; padding: 10px; border: 1px solid #638f8d; color: #fff4d9; background: #061f28; font: 18px monospace; border-radius: 0; }
+.button-row { display: flex; gap: 10px; }
+.button-row > button { flex: 1; }
+.stats-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 15px 0; }
+.stats-grid dt { color: #93bdbe; font-size: 11px; }.stats-grid dd { margin: 4px 0 0; font-size: 20px; overflow-wrap: anywhere; }
+.notice { color: #46dfc1; }.error { color: #ffb4a2; }
+.shop-card { background: #164a5366; padding: 14px; margin: 12px 0; border: 1px solid #638f8d55; }
+.ui-card table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 15px; }
+.ui-card th, .ui-card td { padding: 10px 5px; border-bottom: 1px solid #638f8d55; text-align: left; overflow-wrap: anywhere; }.ui-card td:last-child { color: #ffd166; text-align: right; }
+.mobile-controls { display: none; position: fixed; z-index: 6; left: max(12px, env(safe-area-inset-left)); top: 42%; gap: 10px; }
+.mobile-controls button { width: 60px; height: 60px; border: 1px solid #c4fff588; color: #effff7; background: #092c3780; font-size: 28px; touch-action: none; user-select: none; }
+.rotate-cover { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; padding: 30px; background: #061f28f5; color: #ffd166; font: bold 24px/1.6 monospace; text-align: center; white-space: pre-line; }.rotate-cover[hidden] { display: none; }
+.orientation-hint { display: none !important; }
+@media (pointer: coarse) { .mobile-controls { display: grid; } }
+@media (orientation: portrait) { .menu-screen { background: #061f28c9; justify-content: center; }.ui-card { padding: 18px; } }
+@media (max-height: 450px) { .ui-screen { align-items: flex-start; }.ui-card { padding: 16px; }.menu-screen .ui-card { max-width: 430px; } }
