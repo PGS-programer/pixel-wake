@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import { randomUUID, randomBytes } from 'node:crypto';
 import WebSocket from 'ws';
 const root = process.env.BACKEND_TEST_URL || 'http://127.0.0.1:8787';
+const publicTarget = !['localhost', '127.0.0.1'].includes(new URL(root).hostname);
+const initialScore = publicTarget ? 0 : 1200;
+const updatedScore = publicTarget ? 0 : 2000;
 const accounts = [];
 async function call(path, method = 'GET', body, user = accounts[0]) {
     const res = await fetch(root + path, { method, headers: { 'content-type': 'application/json', ...(user ? { authorization: `Bearer ${user.id}.${user.token}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
@@ -15,13 +18,13 @@ function channel(user) {
     return { ws, wait, send: (type, payload = {}) => ws.send(JSON.stringify({ type, ...payload })) };
 }
 assert.equal((await call('/api/health')).data.ok, true);
-for (const name of ['CLOUD_HOST', 'CLOUD_GUEST']) {
+for (const name of ['QA_CLOUD_HOST', 'QA_CLOUD_GUEST']) {
     const a = { id: randomUUID(), token: randomBytes(32).toString('hex') }; accounts.push(a);
-    assert.equal((await call('/api/identity', 'POST', { ...a, profile: { name, coins: 25, bestScore: 1200, bestDistance: 500, gamesPlayed: 1 } })).status, 200);
+    assert.equal((await call('/api/identity', 'POST', { ...a, profile: { name, coins: publicTarget ? 0 : 25, bestScore: initialScore, bestDistance: publicTarget ? 0 : 500, gamesPlayed: publicTarget ? 0 : 1 } })).status, 200);
 }
 const own = (await call('/api/profile')).data.profile;
-assert.equal((await call('/api/profile', 'PUT', { ...own, bestScore: 2000 })).status, 200);
-assert.equal((await call('/api/ranking')).data.me.bestScore, 2000);
+assert.equal((await call('/api/profile', 'PUT', { ...own, bestScore: updatedScore })).status, 200);
+assert.equal((await call('/api/ranking')).data.me.bestScore, updatedScore);
 const host = channel(accounts[0]), guest = channel(accounts[1]);
 try {
     await Promise.all([host.wait(m => m.type === 'authenticated'), guest.wait(m => m.type === 'authenticated')]);

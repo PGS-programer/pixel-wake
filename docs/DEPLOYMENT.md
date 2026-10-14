@@ -27,7 +27,9 @@ No se deben subir `.env`, `.dev.vars`, `.wrangler`, SQLite, backups ni credencia
 
 Frontend: commit y push a `main` → pruebas y build → comprobación de canonical/assets/robots/sitemap → GitHub Pages. Mantiene la misma URL. El workflow usa permisos mínimos de lectura y publicación de Pages, environment `github-pages` y concurrencia controlada.
 
-Backend: mismo flujo cuando se configura el token de CI y la variable de activación. Si falta ese token, ejecuta `npm run backend:cloud:deploy` después de cambiar reglas/servidor. No se inventan credenciales ni se reutilizan tokens OAuth temporales como secretos de automatización permanente.
+Backend: automatización activada. El secreto `CLOUDFLARE_API_TOKEN` está configurado en GitHub Actions y limitado a `Workers Scripts: Edit` de la cuenta elegida. No tiene permisos de DNS, facturación ni administración de tokens. Se creó con autorización del propietario, sin copiarlo al código ni a archivos locales. El workflow se ejecuta al cambiar los archivos de backend/reglas incluidos en sus filtros; también admite ejecución manual. Revocar el token detiene futuros despliegues automáticos, pero no elimina la versión publicada.
+
+Primer despliegue automático del backend confirmado: https://github.com/PGS-programer/pixel-wake/actions/runs/38576484356 (PASS).
 
 ```sh
 npm install
@@ -60,7 +62,23 @@ La compilación con `SITE_URL` añade canonical, URL/imagen absolutas, datos `Vi
 
 Propiedad recomendada: prefijo de URL `https://pgs-programer.github.io/pixel-wake/`. No se puede verificar el dominio completo `github.io` ni modificar su DNS.
 
-El propietario debe iniciar sesión en su cuenta Google. Verificación HTML: descargar el archivo que Google indique o facilitar la etiqueta de verificación; se puede añadir al proyecto y desplegar sin cambiar el juego. Después se verifica la propiedad, se envía `sitemap.xml` y se solicita indexación con Inspección de URLs. No se inserta una etiqueta inventada ni se afirma que se ha solicitado/indexado sin confirmación.
+Propiedad verificada el 14 de octubre de 2026 mediante la etiqueta HTML real suministrada por Google. Mantener la etiqueta `google-site-verification` de `index.html` para conservar la verificación.
+
+El sitemap se ha enviado. Su URL devuelve HTTP 200 y XML válido; Search Console inicialmente mostró «No se ha podido obtener». Se reenvió tras comprobar la disponibilidad. Ese estado de Google requiere una nueva lectura: no se presenta como sitemap procesado correctamente.
+
+La solicitud de indexación de la página principal está confirmada por Search Console: «Se ha solicitado la indexación» y URL añadida a la cola de rastreo prioritaria. La inspección todavía indica «La URL no está en Google». No se garantiza cuándo cambiará ni una posición en resultados.
+
+## Validación del despliegue público
+
+- Build y comprobación de assets/canonical/robots/sitemap: PASS, también en GitHub Actions.
+- HTTPS frontend y backend: HTTP 200 con validación TLS normal.
+- Navegador público: alta de alias, menú, garaje, partida individual, resultado, perfil online, ranking y creación/salida de lobby comprobados. Alias y récord persistieron tras recargar; consola sin errores ni advertencias en esa sesión.
+- Backend público: prueba HTTP/WebSocket con dos clientes; contraseña incorrecta rechazada, mundo compartido, entradas, empujón y resultado por desconexión persistido: PASS. Perfiles `QA_CLOUD_HOST` y `QA_CLOUD_GUEST` identifican esta prueba; no se inyectan monedas ni puntuaciones altas en un destino público. `QA_DEPLOY` corresponde a la prueba de navegador y su partida real de 23 m / 11 puntos.
+- Responsive: menú verificado a 390 × 844 y escritorio a 1280 × 720. No se ha probado físicamente en iPhone/Android ni Safari; no se afirma esa cobertura. El soporte táctil existente se conserva.
+- Robots de la carpeta: HTTP 200, permite rastreo. Robots de la raíz del host: HTTP 404, sin regla de bloqueo observada.
+- Hosting remoto: frontend en GitHub y backend/datos en Cloudflare; no dependen de procesos locales del Mac. No se ha apagado físicamente el ordenador durante la prueba.
+
+Las capturas de comprobación están en `.checkpoints/deploy-evidence/`, excluidas del repositorio.
 
 Estados distintos:
 
