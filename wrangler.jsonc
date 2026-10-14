@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pixel-wake-backend",
+  "account_id": "56af96bf00cc779f412c8fec92440e90",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "ALLOWED_ORIGINS": "https://pgs-programer.github.io,http://localhost:8080,http://127.0.0.1:8080"
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "BACKEND", "class_name": "PixelWakeBackend" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PixelWakeBackend"] }]
+}

@@ -4,16 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#092c37" />
-    <meta name="description" content="Pixel Wake. Tu barco, el océano y un intento más. Un arcade marítimo de habilidad." />
+    <meta name="description" content="Juega a Pixel Wake gratis en tu navegador: un arcade marítimo en pixel art donde pilotas un barco, esquivas obstáculos, recoges monedas y encadenas combos." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Pixel Wake" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="Pixel Wake – Retro Ocean Runner Game" />
+    <meta property="og:description" content="Tu barco. El océano. Un intento más. Un juego arcade gratuito de habilidad en pixel art para navegador." />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Pixel Wake: un barco sobre el océano en pixel art." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pixel Wake – Retro Ocean Runner Game" />
+    <meta name="twitter:description" content="Esquiva, arriesga y supera tu récord. Juega gratis desde el navegador." />
+    <!-- PUBLIC_SITE_METADATA -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/style.css" />
-    <title>Pixel Wake · Ocean Arcade</title>
+    <title>Pixel Wake – Retro Ocean Runner Game | Juego de barcos</title>
 </head>
 <body>
     <main id="app" aria-label="Pixel Wake, videojuego arcade marítimo">
-        <div id="game-container" role="application" aria-label="W y S o flechas para navegar. P para pausar. En móvil arrastra en el mar."></div>
+        <div id="game-container" role="application" aria-label="W y S o flechas para navegar. P para pausar. En móvil usa los botones o arrastra en el mar."></div>
     </main>
-    <aside class="orientation-hint">Gira tu móvil para navegar con más espacio ↻</aside>
+    <details id="about-game" class="about-game">
+        <summary>Sobre Pixel Wake</summary>
+        <article>
+            <h1>Pixel Wake – Retro Ocean Runner</h1>
+            <p>Pixel Wake es un juego arcade marítimo en pixel art. Controla un barco, esquiva rocas, boyas y otras embarcaciones, recoge monedas y trata de superar tu récord.</p>
+            <p>Juega gratis directamente desde el navegador, en ordenador, móvil o tablet. No necesitas descargar el juego. En móvil, navega en horizontal.</p>
+            <h2>Habilidad, riesgo y combos</h2>
+            <p>Pasa cerca de los obstáculos sin chocar para conseguir bonus y encadenar combos sin límite. La velocidad aumenta cada 250 metros y los patrones introducen nuevos peligros.</p>
+            <h2>Cómo jugar</h2>
+            <p>En ordenador, usa W/S o las flechas para subir y bajar, y P o Escape para pausar. En móvil, utiliza ▲ y ▼ o arrastra el dedo sobre el mar. Recoge monedas para desbloquear barcos cosméticos en el garaje.</p>
+            <h2>Tu perfil y el modo 1v1</h2>
+            <p>Elige un alias y conserva tu progreso en el navegador. Cuando el servidor online está disponible, puedes sincronizar el perfil, consultar el ranking y crear una sala privada para competir contra otra persona. En 1v1 los barcos pueden empujarse: gana el último que siga a flote.</p>
+            <h2>Privacidad y guardado</h2>
+            <p>El juego no pide nombre real ni email. Los guardados locales dependen del navegador y de la dirección del sitio; borrarlos o cambiar de navegador puede impedir recuperar tu perfil anónimo.</p>
+            <p>Pixel Wake game: un pequeño retro ocean runner de barcos, habilidad y una travesía más.</p>
+            <noscript><p>Activa JavaScript para jugar. Puedes leer aquí la descripción y los controles sin ejecutar el juego.</p></noscript>
+        </article>
+    </details>
     <script type="module" src="./src/main.js"></script>
 </body>
 </html>

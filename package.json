@@ -12,11 +12,16 @@
     "test": "node --test tests/*.test.js",
     "server": "node --env-file-if-exists=.env.server server/index.js",
     "test:online": "node tests/backend.integration.js",
-    "test:browser": "node tests/browser.integration.cjs"
+    "test:browser": "node tests/browser.integration.cjs",
+    "preview": "vite preview --config vite/config.prod.mjs --host 127.0.0.1 --port 4173",
+    "verify:deploy": "node scripts/verify-deploy.mjs",
+    "backend:cloud:dev": "wrangler dev --port 8787 --ip 127.0.0.1",
+    "backend:cloud:deploy": "wrangler deploy"
   },
   "devDependencies": {
     "terser": "^5.39.0",
-    "vite": "^6.4.4"
+    "vite": "^6.4.4",
+    "wrangler": "^4.151.0"
   },
   "dependencies": {
     "phaser": "4.0.0",

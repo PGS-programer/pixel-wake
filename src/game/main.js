@@ -27,11 +27,20 @@ const config = {
 };
 
 const StartGame = (parent) => {
-    return new Phaser.Game({
+    const game = new Phaser.Game({
         ...config,
         parent,
         callbacks: { postBoot: game => watchViewport(game, document.getElementById(parent)) }
     });
+    const setActive = active => { document.body.classList.toggle('gameplay-active', active); if (active) document.getElementById('about-game')?.removeAttribute('open'); };
+    game.events.once('ready', () => {
+        for (const key of ['GameScene', 'MultiplayerGameScene']) {
+            const scene = game.scene.getScene(key);
+            scene.events.on('create', () => setActive(true));
+            scene.events.on('shutdown', () => setActive(false));
+        }
+    });
+    return game;
 };
 
 export default StartGame;

@@ -1,0 +1,38 @@
+name: Deploy Pixel Wake backend
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+      - 'server/rooms.js'
+      - 'server/sql-store.js'
+      - 'src/shared/**'
+      - 'src/game/multiplayer/simulation.js'
+      - 'src/game/systems/**'
+      - 'src/game/data/**'
+      - 'src/game/config.js'
+      - 'wrangler.jsonc'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-backend
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: vars.CLOUDFLARE_BACKEND_AUTO_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Deploy using a restricted Workers token
+        run: npm run backend:cloud:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

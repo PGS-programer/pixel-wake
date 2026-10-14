@@ -43,3 +43,8 @@ canvas { display: block; image-rendering: pixelated; touch-action: none; box-sha
 @media (pointer: coarse) { .mobile-controls { display: grid; } }
 @media (orientation: portrait) { .menu-screen { background: #061f28c9; justify-content: center; }.ui-card { padding: 18px; } }
 @media (max-height: 450px) { .ui-screen { align-items: flex-start; }.ui-card { padding: 16px; }.menu-screen .ui-card { max-width: 430px; } }
+.about-game { position: fixed; right: max(12px, env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); z-index: 15; color: #a5d8d1; font: 13px/1.5 monospace; }
+.about-game > summary { cursor: pointer; padding: 10px 14px; min-height: 42px; background: #092c37; border: 1px solid #638f8d; }
+.about-game[open] { inset: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); padding: 18px; overflow: auto; background: #092c37fc; border: 1px solid #638f8d; z-index: 30; }
+.about-game article { max-width: 760px; margin: 24px auto; font-size: 16px; }.about-game h1, .about-game h2 { color: #ffd166; }
+body.gameplay-active .about-game:not([open]) { display: none; }

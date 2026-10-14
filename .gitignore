@@ -30,3 +30,16 @@ dist-ssr
 !.env.server.example
 server/data/
 .checkpoints/
+
+# Deployment and browser test artifacts
+.deploy-local/
+test-results/
+playwright-report/
+*.zip
+*.tar.gz
+
+# Cloudflare local state and credentials
+.wrangler/
+.dev.vars
+.dev.vars.*
+wrangler-debug.log

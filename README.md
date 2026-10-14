@@ -1,5 +1,7 @@
 # Pixel Wake
 
+[Jugar online](https://pgs-programer.github.io/pixel-wake/) · [Repositorio](https://github.com/PGS-programer/pixel-wake) · [Despliegue y SEO](docs/DEPLOYMENT.md)
+
 **Versión 2.0:** perfil obligatorio con migración de guardados, ranking del servidor, salas 1v1 con empujes y controles móviles. El modo individual sigue disponible si el backend está caído. [Informe y pruebas](docs/ONLINE_RELEASE.md) · [Configurar backend y jugar con dos personas](docs/BACKEND_SETUP.md).
 
 Arcade marítimo hecho con JavaScript, Phaser 4.0.0 y Vite. Navega por la Costa Esmeralda, recoge monedas y encadena pasos cercanos sin chocar. Los barcos y las estelas son cosméticos: comprar nunca cambia la velocidad ni la hitbox.
@@ -22,7 +24,7 @@ npm test       # reglas, generador, colisiones y almacenamiento
 npm run build # salida estática en dist/
 ```
 
-`dev-nolog` y `build-nolog` siguen disponibles por compatibilidad. No se ha publicado el juego ni se han añadido servicios externos.
+`dev-nolog` y `build-nolog` siguen disponibles por compatibilidad. La publicación usa GitHub Pages para el juego y Cloudflare Workers con SQLite persistente para perfiles, ranking y 1v1. No requiere que el Mac permanezca encendido; se respetan los límites del plan gratuito.
 
 ## Controles
 

@@ -15,6 +15,7 @@ class Network extends EventTarget {
                 ws.addEventListener('open', () => ws.send(JSON.stringify({ type: 'auth', ...credentials() })));
                 ws.addEventListener('message', e => {
                     let msg; try { msg = JSON.parse(e.data); } catch { return; }
+                    if (msg.type === 'ping') { this.send('pong'); return; }
                     if (msg.type === 'authenticated') { complete = true; clearTimeout(timeout); this.status = 'online'; resolve(); }
                     if (msg.type === 'room') this.room = msg.room;
                     if (msg.type === 'state') { this.state = msg.state; this.roundId = msg.roundId; this.receivedAt = performance.now(); }
