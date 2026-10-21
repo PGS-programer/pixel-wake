@@ -9,11 +9,12 @@ const out = process.env.QA_OUTPUT_DIR || '/tmp/pixel-wake-online-shots'; fs.mkdi
     const errors = [];
     const make = async (opts = {}) => { const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, ...opts }); const p = await ctx.newPage(); p.on('pageerror', e => { errors.push(e.message); console.error(e.message); }); return p; };
     const active = (p, key) => p.waitForFunction(key => window.__PIXEL_WAKE__?.scene.isActive(key), key);
+    const openArcade = async p => { await p.goto(root); await p.locator('[data-arcade]').click(); };
     const clickCanvas = async (p, x, y) => { const r = await p.locator('canvas').boundingBox(); await p.mouse.click(r.x + x * r.width / 960, r.y + y * r.height / 540); };
-    const profile = async (p, name) => { await p.goto(root); await active(p, 'ProfileScene'); await p.getByLabel('NOMBRE DE JUGADOR').fill(name); await p.getByRole('button', { name: 'CONTINUAR' }).click(); await active(p, 'MenuScene'); await p.waitForFunction(async () => (await import('/src/game/services/player.js')).syncStatus() === 'online'); };
+    const profile = async (p, name) => { await openArcade(p); await active(p, 'ProfileScene'); await p.getByLabel('NOMBRE DE JUGADOR').fill(name); await p.getByRole('button', { name: 'CONTINUAR' }).click(); await active(p, 'MenuScene'); await p.waitForFunction(async () => (await import('/src/game/services/player.js')).syncStatus() === 'online'); };
     const host = await make(), guest = await make();
     await host.addInitScript(() => { if (!localStorage.getItem('__qaSeeded')) { localStorage.setItem('__qaSeeded', '1'); localStorage.setItem('pixelWakeHighScore', '500'); localStorage.setItem('pixelWakeBestPoints', '2000'); localStorage.setItem('pixelWakeCoins', '75'); localStorage.setItem('pixelWakeUnlockedBoats', '["coastal","riptide"]'); localStorage.setItem('pixelWakeSelectedBoat', 'riptide'); } });
-    await host.goto(root); await active(host, 'ProfileScene'); await host.getByLabel('NOMBRE DE JUGADOR').fill('<script>'); await host.getByRole('button', { name: 'CONTINUAR' }).click(); assert.ok(await host.locator('[role=status]').textContent());
+    await openArcade(host); await active(host, 'ProfileScene'); await host.getByLabel('NOMBRE DE JUGADOR').fill('<script>'); await host.getByRole('button', { name: 'CONTINUAR' }).click(); assert.ok(await host.locator('[role=status]').textContent());
     await host.getByLabel('NOMBRE DE JUGADOR').fill('POL_QA'); await host.getByRole('button', { name: 'CONTINUAR' }).click(); await active(host, 'MenuScene');
     await host.waitForFunction(async () => (await import('/src/game/services/player.js')).syncStatus() === 'online');
     const migrated = await host.evaluate(async () => (await import('/src/game/services/player.js')).getPlayer()); assert.equal(migrated.coins, 75); assert.equal(migrated.bestScore, 2000); assert.equal(migrated.selectedBoat, 'riptide');
@@ -58,11 +59,11 @@ const out = process.env.QA_OUTPUT_DIR || '/tmp/pixel-wake-online-shots'; fs.mkdi
     assert.ok(await mobile.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y < 250)); await mobile.screenshot({ path: out + '/mobile-game.png' });
     await mobile.setViewportSize({ width: 390, height: 844 }); await mobile.locator('.rotate-cover:not([hidden])').waitFor(); assert.equal(await mobile.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').isPaused), true);
     // Offline fallback is tested in a separate context with every API request blocked.
-    const offline = await make(); await offline.route('**/api/**', route => route.abort()); await offline.goto(root); await active(offline, 'ProfileScene'); await offline.getByLabel('NOMBRE DE JUGADOR').fill('OFFLINE'); await offline.getByRole('button', { name: 'CONTINUAR' }).click(); await active(offline, 'MenuScene'); await offline.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); await active(offline, 'GameScene'); await offline.evaluate(() => { window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y = 225; }); await offline.waitForTimeout(500); assert.ok(await offline.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').distance > 0));
+    const offline = await make(); await offline.route('**/api/**', route => route.abort()); await openArcade(offline); await active(offline, 'ProfileScene'); await offline.getByLabel('NOMBRE DE JUGADOR').fill('OFFLINE'); await offline.getByRole('button', { name: 'CONTINUAR' }).click(); await active(offline, 'MenuScene'); await offline.getByRole('button', { name: 'JUGAR', exact: false }).filter({ hasText: '▶' }).click(); await active(offline, 'GameScene'); await offline.evaluate(() => { window.__PIXEL_WAKE__.scene.getScene('GameScene').boat.y = 225; }); await offline.waitForTimeout(500); assert.ok(await offline.evaluate(() => window.__PIXEL_WAKE__.scene.getScene('GameScene').distance > 0));
     if (process.env.PIXEL_WAKE_PROD_URL) {
         const production = await make(); const failed = [];
         production.on('response', response => { if (response.status() >= 400) failed.push(response.url()); });
-        await production.goto(process.env.PIXEL_WAKE_PROD_URL);
+        await production.goto(process.env.PIXEL_WAKE_PROD_URL); await production.locator('[data-arcade]').click();
         await production.getByLabel('NOMBRE DE JUGADOR').fill('PROD_QA'); await production.getByRole('button', { name: 'CONTINUAR' }).click();
         await production.getByRole('button', { name: 'RANKING', exact: true }).click(); await production.waitForSelector('tbody tr');
         assert.equal(await production.evaluate(() => typeof window.__PIXEL_WAKE__), 'undefined');

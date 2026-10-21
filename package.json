@@ -1,7 +1,7 @@
 {
   "name": "pixel-wake",
-  "description": "Pixel Wake — arcade marítimo con Phaser 4 y Vite",
-  "version": "2.0.0",
+  "description": "Pixel Wake — arcade marítimo y simulador de atraque 3D con Phaser, Three.js y Vite",
+  "version": "3.0.0",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "phaser": "4.0.0",
+    "three": "^0.186.1",
     "ws": "^8.22.0"
   },
   "engines": {

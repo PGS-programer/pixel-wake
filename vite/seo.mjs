@@ -17,8 +17,8 @@ export function seoPlugin(site) {
             if (!site) return html;
             const href = site.href, image = new URL('social-preview.png', site).href;
             const data = { '@context': 'https://schema.org', '@type': 'VideoGame', name: 'Pixel Wake', alternateName: 'Pixel Wake game',
-                url: href, description: 'Juego arcade marítimo en pixel art. Esquiva obstáculos, recoge monedas y encadena combos desde el navegador.',
-                genre: ['Arcade', 'Endless runner'], gamePlatform: 'Web browser', applicationCategory: 'Game', operatingSystem: 'Any',
+                url: href, description: 'Arcade marítimo en pixel art y simulador introductorio de atraque 3D con doble hélice, jugables desde el navegador.',
+                genre: ['Arcade', 'Endless runner', 'Simulation'], gamePlatform: 'Web browser', applicationCategory: 'Game', operatingSystem: 'Any',
                 inLanguage: 'es', isAccessibleForFree: true, image };
             return html.replace('<!-- PUBLIC_SITE_METADATA -->', `<link rel="canonical" href="${escape(href)}" />\n<meta property="og:url" content="${escape(href)}" />\n<meta property="og:image" content="${escape(image)}" />\n<meta name="twitter:image" content="${escape(image)}" />\n<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`);
         },

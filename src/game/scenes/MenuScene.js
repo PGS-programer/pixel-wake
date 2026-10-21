@@ -7,6 +7,7 @@ import { getPlayer } from '../services/player.js';
 import { activeMission } from '../data/progression.js';
 import { screen, action, stats, element } from '../ui/screen.js';
 import { canStartGameplay } from '../ui/mobile.js';
+import { openHarbor } from '../../platform/navigation.js';
 export default class MenuScene extends Phaser.Scene {
     constructor() { super('MenuScene'); }
     create() {
@@ -22,6 +23,7 @@ export default class MenuScene extends Phaser.Scene {
         const row2 = element('div', '', 'button-row'); ui.card.append(row2);
         action(row2, 'PERFIL', () => this.scene.start('ProfileScene', { view: true })); action(row2, 'BITÁCORA', () => this.scene.start('JournalScene'));
         action(ui.card, 'AJUSTES', () => this.scene.start('SettingsScene'));
+        action(ui.card, '← CENTRO NÁUTICO', openHarbor);
         stats(ui.card, [['RÉCORD', `${p.bestDistance} m`], ['PUNTOS', p.bestScore], ['MONEDAS', p.coins]]);
         const mission = activeMission(p.progress); if (mission) ui.card.append(element('p', `○ ${mission.description} · +${mission.reward} monedas`, 'small'));
         bindKey(this, 'keydown-SPACE', play);

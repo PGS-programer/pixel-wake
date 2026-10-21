@@ -2,9 +2,9 @@
 
 [Jugar online](https://pgs-programer.github.io/pixel-wake/) · [Repositorio](https://github.com/PGS-programer/pixel-wake) · [Despliegue y SEO](docs/DEPLOYMENT.md)
 
-**Versión 2.0:** perfil obligatorio con migración de guardados, ranking del servidor, salas 1v1 con empujes y controles móviles. El modo individual sigue disponible si el backend está caído. [Informe y pruebas](docs/ONLINE_RELEASE.md) · [Configurar backend y jugar con dos personas](docs/BACKEND_SETUP.md).
+**Versión 3.0 — Centro náutico:** el inicio permite elegir entre el arcade original y un simulador de atraque 3D en primera persona. El arcade conserva perfiles, ranking, garaje, combos, guardados y 1v1. El simulador funciona sin backend y usa una clave de progreso independiente. [Diseño naval, fuentes y límites](docs/NAUTICAL_DESIGN.md) · [Verificación del simulador](docs/SIMULATOR_RELEASE.md).
 
-Arcade marítimo hecho con JavaScript, Phaser 4.0.0 y Vite. Navega por la Costa Esmeralda, recoge monedas y encadena pasos cercanos sin chocar. Los barcos y las estelas son cosméticos: comprar nunca cambia la velocidad ni la hitbox.
+Plataforma marítima hecha con JavaScript, Phaser 4.0.0, Three.js 0.186.1 y Vite. El arcade sigue navegando por la Costa Esmeralda, recogiendo monedas y encadenando pasos cercanos. Sus barcos y estelas siguen siendo cosméticos: comprar nunca cambia velocidad ni hitbox. El nuevo PW–20 permite practicar maniobras aproximadas de doble hélice; no es una herramienta de navegación real.
 
 ## Ejecutar
 
@@ -27,6 +27,30 @@ npm run build # salida estática en dist/
 `dev-nolog` y `build-nolog` siguen disponibles por compatibilidad. La publicación usa GitHub Pages para el juego y Cloudflare Workers con SQLite persistente para perfiles, ranking y 1v1. No requiere que el Mac permanezca encendido; se respetan los límites del plan gratuito.
 
 ## Controles
+
+### Simulador de atraque
+
+En el centro náutico, selecciona **Al mando del puente → Primer atraque**. El barco empieza fuera del puerto. Sigue la práctica guiada y la carta; entra entre roja a babor y verde a estribor, gira dentro de la dársena y aproxima al puesto E–02 por estribor. No hay piloto automático en el juego.
+
+| Acción | Control |
+| --- | --- |
+| Motor de babor, aumentar/reducir | W / S, mantener |
+| Motor de estribor, aumentar/reducir | O / L, mantener |
+| Ambos mandos a neutral | N |
+| Timón a babor / estribor | ← / → |
+| Retorno progresivo a la vía | ↑ |
+| Mirar sin cambiar rumbo | Arrastrar ratón o dedo sobre el exterior |
+| Puente / banda babor / banda estribor / exterior didáctico | 1 / 2 / 3 / 4 |
+| Acercar instrumentos | Z o rueda del ratón; botón para pantallas ampliadas |
+| Ordenar amarre cuando se autorice | M o botón |
+| Pausa / reanudar | P / Escape o botón |
+| Mostrar/ocultar práctica guiada | H |
+
+También puedes arrastrar las palancas físicas y el timón del puente. En móvil hay dos palancas virtuales independientes, timón, neutral, centrado, cámara y amarre. Horizontal deja más vista exterior; los menús funcionan en vertical. Desde **Opciones** en el centro náutico se eligen calidad gráfica, sonido y sensibilidad. La calidad reducida elimina reflejos planares y sombras; no cambia la física.
+
+Para amarrar: paralelo (<8°), banda a 0,35–3,5 m, dentro de la posición longitudinal asignada, casi detenido, ambos mandos neutrales y ejes desacelerados. Mantén 3 s y ordena M. La tripulación asegura seis cabos durante 10 s; perder la posición segura aborta la orden. La nota ≥60 desbloquea la siguiente de cinco misiones. El progreso del simulador es local y separado del ranking arcade.
+
+### Arcade original
 
 | Acción | Control |
 | --- | --- |
@@ -95,6 +119,8 @@ La detección de choque y near miss analiza el movimiento relativo durante todo 
 ```text
 src/
   main.js                 Arranque del DOM; inspector solo en desarrollo
+  platform/               Centro náutico, selector de modos y misiones, navegación
+  simulator/              Física naval, Three.js, puerto, tutorial, amarre y resultados
   game/
     main.js               Configuración y registro de escenas
     config.js             Dimensiones, balance y claves heredadas

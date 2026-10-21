@@ -9,8 +9,9 @@ export function screen(scene, title, subtitle = '', { menu = false } = {}) {
     layer.addEventListener('keydown', e => { if (e.target.closest('input, button, select, textarea')) e.stopPropagation(); });
     layer.addEventListener('keyup', e => { if (e.target.closest('input, button, select, textarea')) e.stopPropagation(); });
     document.getElementById('app').append(layer);
-    const destroy = () => { layer.remove(); scene.events.off('shutdown', destroy); };
+    const destroy = () => { layer.remove(); scene.events.off('shutdown', destroy); scene.events.off('destroy', destroy); };
     scene.events.once('shutdown', destroy);
+    scene.events.once('destroy', destroy);
     return { layer, card, destroy, message: (text, error = false) => { let n = card.querySelector('[role=status]'); if (!n) { n = element('p'); n.setAttribute('role', 'status'); card.append(n); } n.textContent = text; n.className = error ? 'error' : 'notice'; } };
 }
 export function action(parent, text, fn, primary = false) {
