@@ -45,6 +45,8 @@ Tutorial en marcha: mirar, motores avante, neutral, atrás, timón y centrado, g
 
 ## Recursos y límites
 
+La distribución incluye `public/THIRD_PARTY_NOTICES.txt` con los avisos y licencias MIT de Three.js y Phaser, también copiados a `dist/` en producción.
+
 Toda la geometría del casco, puente, puerto, pantallas, carta del menú y normales de agua es original y generada en código local. Se investigaron referencias gratuitas; no se encontró necesario incorporar un modelo externo con una licencia o propulsión incompatible. No se descargan fotografías, fuentes, texturas ni sonidos esenciales de CDNs. Audio sintetizado localmente con Web Audio: dos motores ligados a RPM, ambiente ligado a velocidad/viento y señales de órdenes/contacto. Three.js: licencia MIT, conservada por npm. Phaser y el backend permanecen presentes.
 
 Limitaciones: sin identificación hidrodinámica experimental, sin prop walk calibrado, sin interacción hélice/casco completa, sin squat/bank effects, sin marea ni oleaje 6DOF. Profundidad uniforme de 7,2 m, carta y radar esquemáticos sin clutter/AIS/ARPA, iluminación diurna, barcos del entorno estáticos. Balanceo visual mínimo no interviene en colisiones. La calidad reducida elimina reflejos planares y sombras. Esto no es una réplica fotorealista ni un equipo ECDIS/radar certificado.

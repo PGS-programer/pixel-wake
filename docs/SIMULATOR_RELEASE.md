@@ -52,6 +52,8 @@ El guardado `pixelWakeDockingV1` valida versión, niveles, resultados numéricos
 
 ## Archivos
 
+`public/THIRD_PARTY_NOTICES.txt` conserva los avisos MIT de los dos motores en la distribución compilada.
+
 - `src/platform/Platform.js`, `navigation.js`, `platform.css`: centro náutico, niveles, preferencias y ciclo de vida de cada modo.
 - `src/simulator/physics/vessel.js`, `collisions.js`, `clock.js`: estado, actuadores, fuerzas, impulso y paso fijo.
 - `src/simulator/world/harbor.js`: geometría física, puestos, bolardos y parámetros de las cinco misiones.
