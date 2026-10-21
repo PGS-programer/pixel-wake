@@ -1,5 +1,7 @@
 # Pixel Wake · PW–20, diseño e investigación
 
+La actualización 3.1 conserva las ecuaciones, actuadores y controles descritos aquí. Sustituye la distribución del puerto y los criterios de atraque por nivel: véase [Puerto mediterráneo](MEDITERRANEAN_HARBOR.md).
+
 Consultado el 21 de octubre de 2026. Es un juego didáctico introductorio, no un simulador homologado. No está calibrado mediante pruebas de mar ni representa exactamente un barco comercial. El arcade original mantiene sus reglas y almacenamiento. El nuevo modo usa exclusivamente `pixelWakeDockingV1` para resultados y preferencias locales; no modifica el perfil remoto ni las monedas.
 
 ## Referencias verificadas

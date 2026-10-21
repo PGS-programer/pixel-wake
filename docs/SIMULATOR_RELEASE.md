@@ -1,5 +1,7 @@
 # PW–20 · primera versión completa
 
+Este informe corresponde a la versión 3.0. La distribución del puerto, tolerancias y cifras de la actualización 3.1 se documentan en [MEDITERRANEAN_HARBOR.md](MEDITERRANEAN_HARBOR.md).
+
 Fecha: 21 de octubre de 2026. Nueva plataforma con arcade conservado y simulador 3D de atraque. Investigación y ecuaciones: [NAUTICAL_DESIGN.md](NAUTICAL_DESIGN.md). Controles e inicio: [README](../README.md).
 
 ## Comprobaciones realizadas

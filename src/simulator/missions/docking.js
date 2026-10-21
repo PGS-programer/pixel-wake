@@ -1,19 +1,13 @@
 import { VESSEL, angleDifference, knots, bodyPoint, groundVelocity, neutral } from '../physics/vessel.js';
-export function dockingMetrics(s, mission) {
-    const angle = Math.abs(angleDifference(s.heading));
-    const extent = Math.abs(Math.cos(s.heading)) * VESSEL.beam / 2 + Math.abs(Math.sin(s.heading)) * VESSEL.length / 2;
-    const gap = 75 - mission.side * s.x - extent;
-    const along = Math.abs(s.y - mission.targetY);
-    const speed = Math.hypot(s.u, s.v);
-    const neutralEngines = [s.port, s.starboard].every(e => Math.abs(e.lever) < .055 && Math.abs(e.shaft) < .07);
-    return { angle, gap, along, speed, neutralEngines,
-        safe: gap >= .35 && gap <= 3.5 && along <= mission.precision && angle < 8 * Math.PI / 180 && Math.abs(s.u) < .22 && Math.abs(s.v) < .12 && Math.abs(s.r) < .008 && neutralEngines };
-}
+import { PORT } from '../world/harbor.js';
+import { playerMoorings } from '../world/moorings.js';
+import { dockingMetrics, dockingLimits } from './berth.js';
+export { dockingMetrics } from './berth.js';
 export class DockingMission {
     constructor(config, harbor) { this.config = config; this.harbor = harbor; this.phase = 'entrada'; this.entered = false; this.safeTime = 0; this.lines = []; this.mooringTime = 0; this.finished = false; this.lastImpacts = new Map(); this.stats = { maxFinalSpeed: 0, maxContact: 0, collisions: 0, severe: 0, fenderContacts: 0, reversals: 0, engineEffort: 0 }; this.signs = [0, 0]; }
     update(s, dt, impacts = []) {
         if (this.finished) return;
-        if (!this.entered && s.y > -50 && Math.abs(s.x) < 31) this.entered = true;
+        if (!this.entered && s.y > PORT.entryY && Math.abs(s.x) < PORT.entranceHalfWidth) this.entered = true;
         const d = dockingMetrics(s, this.config); this.metrics = d;
         if (Math.hypot(s.x - this.config.targetX, s.y - this.config.targetY) < 40) this.stats.maxFinalSpeed = Math.max(this.stats.maxFinalSpeed, knots(d.speed));
         this.phase = !this.entered ? 'entrada' : d.along < 25 && Math.abs(s.x - this.config.targetX) < 25 ? 'posicionamiento' : 'aproximación';
@@ -37,10 +31,10 @@ export class DockingMission {
         }
     }
     requestMooring(s) {
-        if (this.safeTime < 3 || !dockingMetrics(s, this.config).safe || this.lines.length) return false;
-        const side = this.config.side;
-        const ends = [[8, 79, 'Largo de proa'], [-8, 35, 'Largo de popa'], [7, 45, 'Esprín de proa'], [-7, 69, 'Esprín de popa'], [3, 60, 'Través de proa'], [-3, 54, 'Través de popa']];
-        this.lines = ends.map(([forward, y, name], i) => { const point = bodyPoint(s, forward, side * 2.5); return { forward, starboard: side * 2.5, shore: { x: side * 76, y: y }, rest: Math.hypot(point.x - side * 76, point.y - y), secured: false, order: i + 1, name }; });
+        if (!this.entered || this.finished || this.safeTime < dockingLimits(this.config).hold || !dockingMetrics(s, this.config).safe || this.lines.length) return false;
+        const lines = playerMoorings(s, this.config, this.harbor.bollards);
+        if (lines.length !== 6) return false;
+        this.lines = lines;
         return true;
     }
     applyLines(s, dt) {
@@ -55,10 +49,10 @@ export class DockingMission {
     }
     evaluate(s) {
         const d = dockingMetrics(s, this.config), t = this.stats;
-        const position = Math.max(0, 25 - d.along / this.config.precision * 12 - Math.abs(d.gap - 2) * 3);
-        const alignment = Math.max(0, 20 - d.angle * 180 / Math.PI * 2);
+        const position = Math.max(0, 25 - Math.max(0, d.along - (this.config.id <= 2 ? 3 : 1)) / this.config.precision * 9 - Math.max(0, Math.abs(d.gap - 2.5) - 1) * 2);
+        const alignment = Math.max(0, 20 - Math.max(0, d.angle * 180 / Math.PI - (this.config.id <= 2 ? 5 : 2)) * 1.3);
         const contact = Math.max(0, 25 - t.collisions * 5 - t.severe * 8 - t.maxContact * 6);
-        const approach = Math.max(0, 20 - Math.max(0, t.maxFinalSpeed - 2) * 5);
+        const approach = Math.max(0, 20 - Math.max(0, t.maxFinalSpeed - dockingLimits(this.config).finalSpeedKn) * 5);
         const control = Math.max(0, 10 - Math.max(0, t.reversals - 12) * .3);
         const score = Math.round(position + alignment + contact + approach + control);
         const tips = [];

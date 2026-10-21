@@ -1,3 +1,4 @@
+import { PLAYER_CLEATS } from '../world/moorings.js';
 import * as THREE from 'three';
 import { box, cylinder, tube, textPanel, material } from './primitives.js';
 export function createVessel(scene) {
@@ -62,7 +63,7 @@ export function createVessel(scene) {
     for (const side of [-1, 1]) {
         for (const f of [3.8, 5.8, 7.5]) cylinder(root, side * (f > 7 ? 1.4 : 2.25), 1.85, -f, .025, 1.15, trim, 8);
         tube(root, [[side*2.25,2.4,-3.8],[side*2.25,2.4,-5.8],[side*1.4,2.4,-7.5],[0,2.4,-8.6]], .026, trim);
-        for (const f of [-8,-3,3,8]) { cylinder(root, side * 2.15, 1.45, -f, .1, .28, trim); box(root,side*2.15,1.6,-f,.35,.07,.12,trim); }
+        for (const cleat of PLAYER_CLEATS) { cylinder(root, side * cleat.across, 1.45, -cleat.forward, .1, .28, trim); box(root,side*cleat.across,1.6,-cleat.forward,.35,.07,.12,trim); }
     }
     box(root, 0, 1.45, -6.6, .65, .4, .6, navy); cylinder(root,0,1.7,-6.6,.18,.2,trim);
     box(root, 0, 1.5, -4.6, 1.5, .14, 1, material('#61797b'));

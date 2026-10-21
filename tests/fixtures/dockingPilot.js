@@ -2,7 +2,7 @@
 import { VESSEL, angleDifference, clamp } from '../../src/simulator/physics/vessel.js';
 export function createPilot(mission) {
     let waypoint = 0, stopping = false, stopHeading = 0;
-    const route = [{ x: 0, y: -30 }, { x: mission.side * 55, y: 0 }, { x: mission.side * 65, y: 25 }, { x: mission.targetX, y: mission.targetY }];
+    const route = [{ x: 0, y: -22 }, { x: mission.side * 38, y: -5 }, { x: mission.side * 49, y: 7 }, { x: mission.targetX, y: mission.targetY }];
     return state => {
         const goal = route[waypoint], dx = goal.x - state.x, dy = goal.y - state.y, distance = Math.hypot(dx, dy), last = waypoint === route.length - 1;
         if (distance < (last ? 2.2 : 3) && !stopping) { stopping = true; stopHeading = state.heading; }

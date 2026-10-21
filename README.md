@@ -2,7 +2,7 @@
 
 [Jugar online](https://pgs-programer.github.io/pixel-wake/) · [Repositorio](https://github.com/PGS-programer/pixel-wake) · [Despliegue y SEO](docs/DEPLOYMENT.md)
 
-**Versión 3.0 — Centro náutico:** el inicio permite elegir entre el arcade original y un simulador de atraque 3D en primera persona. El arcade conserva perfiles, ranking, garaje, combos, guardados y 1v1. El simulador funciona sin backend y usa una clave de progreso independiente. [Diseño naval, fuentes y límites](docs/NAUTICAL_DESIGN.md) · [Verificación del simulador](docs/SIMULATOR_RELEASE.md).
+**Versión 3.1 — Puerto mediterráneo:** el inicio permite elegir entre el arcade original y un simulador de atraque 3D en primera persona. El simulador incorpora un puerto compacto, embarcaciones amarradas, guía de atraque por colores y movimiento visual interpolado. El arcade conserva perfiles, ranking, garaje, combos, guardados y 1v1. El simulador funciona sin backend y usa una clave de progreso independiente. [Actualización del puerto y pruebas](docs/MEDITERRANEAN_HARBOR.md) · [Diseño naval, fuentes y límites](docs/NAUTICAL_DESIGN.md) · [Verificación inicial del simulador](docs/SIMULATOR_RELEASE.md).
 
 Plataforma marítima hecha con JavaScript, Phaser 4.0.0, Three.js 0.186.1 y Vite. El arcade sigue navegando por la Costa Esmeralda, recogiendo monedas y encadenando pasos cercanos. Sus barcos y estelas siguen siendo cosméticos: comprar nunca cambia velocidad ni hitbox. El nuevo PW–20 permite practicar maniobras aproximadas de doble hélice; no es una herramienta de navegación real.
 
@@ -48,7 +48,9 @@ En el centro náutico, selecciona **Al mando del puente → Primer atraque**. El
 
 También puedes arrastrar las palancas físicas y el timón del puente. En móvil hay dos palancas virtuales independientes, timón, neutral, centrado, cámara y amarre. Horizontal deja más vista exterior; los menús funcionan en vertical. Desde **Opciones** en el centro náutico se eligen calidad gráfica, sonido y sensibilidad. La calidad reducida elimina reflejos planares y sombras; no cambia la física.
 
-Para amarrar: paralelo (<8°), banda a 0,35–3,5 m, dentro de la posición longitudinal asignada, casi detenido, ambos mandos neutrales y ejes desacelerados. Mantén 3 s y ordena M. La tripulación asegura seis cabos durante 10 s; perder la posición segura aborta la orden. La nota ≥60 desbloquea la siguiente de cinco misiones. El progreso del simulador es local y separado del ranking arcade.
+La flecha, la baliza y la carta indican el puesto y la banda. La zona es roja al estar lejos o aproximarse demasiado rápido, amarilla cuando faltan ajustes y verde únicamente cuando se puede ordenar el amarre. Aparece **POSICIÓN CORRECTA — LISTO PARA AMARRAR**; sigue siendo necesario pulsar M.
+
+En las dos primeras misiones: alineación <16°, banda a 0,4–5,5 m, tolerancia longitudinal de 9/8 m, casi detenido, ambos mandos neutrales y ejes desacelerados durante 2 s. Se comprueban por separado avance, deriva, giro y velocidad total: una buena posición no autoriza amarrar con demasiada arrancada. Los niveles posteriores reducen estas tolerancias. La tripulación asegura seis cabos durante 10 s; perder la posición segura aborta la orden. La nota ≥60 desbloquea la siguiente de cinco misiones. El progreso del simulador es local y separado del ranking arcade.
 
 ### Arcade original
 

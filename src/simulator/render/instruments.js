@@ -1,3 +1,4 @@
+import { dockingCue } from '../missions/berth.js';
 import * as THREE from 'three';
 import { groundVelocity, knots, waterVelocity, angleDifference } from '../physics/vessel.js';
 // Both the 3D displays and enlarged HUD read these same live canvases.
@@ -5,10 +6,10 @@ export class Instruments {
     constructor(meshes) {
         this.displays = meshes.map(mesh => { const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 336; const ctx = canvas.getContext('2d'); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; mesh.material.map = texture; mesh.material.needsUpdate = true; return { canvas, ctx, texture }; });
     }
-    update(s, harbor, mission, metrics) {
+    update(s, harbor, mission, metrics, progress) {
         const heading = ((s.heading * 180 / Math.PI) % 360 + 360) % 360;
         this.drawRadar(this.displays[0].ctx, s, harbor);
-        this.drawChart(this.displays[1].ctx, s, harbor, mission);
+        this.drawChart(this.displays[1].ctx, s, harbor, mission, progress ? dockingCue(metrics, progress, mission).color : "yellow");
         const c = this.displays[2].ctx; this.background(c, 'PW ENGINE / NAV');
         this.value(c,'SOG',knots(Math.hypot(s.u,s.v)).toFixed(2)+' kn',24,77,'#cce6c9');
         const water = waterVelocity(s, mission); this.value(c,'STW',knots(Math.hypot(water.u,water.v)).toFixed(2)+' kn',272,77,'#9ddbd7');
@@ -31,12 +32,12 @@ export class Instruments {
         for(const b of harbor.boxes.filter(b=>b.kind!=='fender')) { c.fillStyle=b.kind==='boat'?'#d3cb80':'#6bc6a2'; c.fillRect(ox+(b.x-b.w/2-s.x)*scale,oy-(b.y+b.h/2-s.y)*scale,Math.max(2,b.w*scale),Math.max(2,b.h*scale)); }
         c.restore(); c.strokeStyle='#e0e7c6'; c.beginPath(); c.moveTo(ox,oy); c.lineTo(ox+Math.sin(s.heading)*27,oy-Math.cos(s.heading)*27); c.stroke(); c.fillStyle='#eef3d4'; c.fillRect(ox-2,oy-2,4,4);
     }
-    drawChart(c,s,harbor,mission) {
+    drawChart(c,s,harbor,mission,color="yellow") {
         this.background(c,'CARTA LOCAL / PUERTO DE LA ESTELA');
-        const project=(x,y)=>[256+x*1.3,226-y*.65];
+        const project=(x,y)=>[256+x*1.3,185-y*1.3];
         c.strokeStyle='#274c54'; for(let x=0;x<512;x+=40) {c.beginPath();c.moveTo(x,40);c.lineTo(x,336);c.stroke();} for(let y=50;y<336;y+=40){c.beginPath();c.moveTo(0,y);c.lineTo(512,y);c.stroke();}
-        for(const b of harbor.boxes.filter(b=>b.kind!=='fender')) {const [x,y]=project(b.x-b.w/2,b.y+b.h/2); c.fillStyle=b.kind==='red'?'#d48271':b.kind==='green'?'#69bd92':b.kind==='boat'?'#e4c08e':'#50696b'; c.fillRect(x,y,Math.max(3,b.w*1.3),Math.max(3,b.h*.65));}
-        const [tx,ty]=project(mission.targetX,mission.targetY); c.strokeStyle='#e5be79'; c.strokeRect(tx-5,ty-9,10,18); c.fillStyle='#e5be79'; c.font='13px monospace'; c.fillText(mission.side===1?'E–02':'W–02',tx-50,ty-20);
+        for(const b of harbor.boxes.filter(b=>b.kind!=='fender')) {const [x,y]=project(b.x-b.w/2,b.y+b.h/2); c.fillStyle=b.kind==='red'?'#d48271':b.kind==='green'?'#69bd92':b.kind==='boat'?'#e4c08e':'#50696b'; c.fillRect(x,y,Math.max(3,b.w*1.3),Math.max(3,b.h*1.3));}
+        const [tx,ty]=project(mission.targetX,mission.targetY); c.strokeStyle={red:'#e46c5a',yellow:'#f0c965',green:'#63d8a0'}[color]; c.lineWidth=2;c.strokeRect(tx-7,ty-(mission.zoneLength||32)*.65,14,(mission.zoneLength||32)*1.3); c.fillStyle=c.strokeStyle; c.font='13px monospace'; c.fillText(mission.side===1?'E–02':'W–02',tx-50,ty-20);
         const [x,y]=project(s.x,s.y); c.save(); c.translate(x,y); c.rotate(s.heading); c.beginPath();c.moveTo(0,-9);c.lineTo(-5,7);c.lineTo(5,7);c.closePath();c.fillStyle='#f1f2db';c.fill();c.restore();
         c.fillStyle='#9bd1c5';c.fillText('N ↑   7.2 m · CARTA SINTÉTICA',18,320);
     }
