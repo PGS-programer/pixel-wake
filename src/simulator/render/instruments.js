@@ -1,6 +1,6 @@
 import { dockingCue } from '../missions/berth.js';
 import * as THREE from 'three';
-import { groundVelocity, knots, waterVelocity, angleDifference } from '../physics/vessel.js';
+import { VESSEL, knots, waterVelocity } from '../physics/vessel.js';
 // Both the 3D displays and enlarged HUD read these same live canvases.
 export class Instruments {
     constructor(meshes) {
@@ -34,11 +34,11 @@ export class Instruments {
     }
     drawChart(c,s,harbor,mission,color="yellow") {
         this.background(c,'CARTA LOCAL / PUERTO DE LA ESTELA');
-        const project=(x,y)=>[256+x*1.3,185-y*1.3];
+        const scale=2,project=(x,y)=>[256+x*scale,205-(y-28)*scale];
         c.strokeStyle='#274c54'; for(let x=0;x<512;x+=40) {c.beginPath();c.moveTo(x,40);c.lineTo(x,336);c.stroke();} for(let y=50;y<336;y+=40){c.beginPath();c.moveTo(0,y);c.lineTo(512,y);c.stroke();}
-        for(const b of harbor.boxes.filter(b=>b.kind!=='fender')) {const [x,y]=project(b.x-b.w/2,b.y+b.h/2); c.fillStyle=b.kind==='red'?'#d48271':b.kind==='green'?'#69bd92':b.kind==='boat'?'#e4c08e':'#50696b'; c.fillRect(x,y,Math.max(3,b.w*1.3),Math.max(3,b.h*1.3));}
-        const [tx,ty]=project(mission.targetX,mission.targetY); c.strokeStyle={red:'#e46c5a',yellow:'#f0c965',green:'#63d8a0'}[color]; c.lineWidth=2;c.strokeRect(tx-7,ty-(mission.zoneLength||32)*.65,14,(mission.zoneLength||32)*1.3); c.fillStyle=c.strokeStyle; c.font='13px monospace'; c.fillText(mission.side===1?'E–02':'W–02',tx-50,ty-20);
-        const [x,y]=project(s.x,s.y); c.save(); c.translate(x,y); c.rotate(s.heading); c.beginPath();c.moveTo(0,-9);c.lineTo(-5,7);c.lineTo(5,7);c.closePath();c.fillStyle='#f1f2db';c.fill();c.restore();
+        for(const b of harbor.boxes.filter(b=>b.kind!=='fender')) {const [x,y]=project(b.x-b.w/2,b.y+b.h/2); c.fillStyle=b.kind==='red'?'#d48271':b.kind==='green'?'#69bd92':b.kind==='boat'?'#e4c08e':'#50696b'; c.fillRect(x,y,Math.max(3,b.w*scale),Math.max(3,b.h*scale));}
+        const [tx,ty]=project(mission.targetX,mission.targetY); c.strokeStyle={red:'#e46c5a',yellow:'#f0c965',green:'#63d8a0'}[color]; c.lineWidth=2;c.strokeRect(tx-mission.zoneWidth,ty-mission.zoneLength,mission.zoneWidth*scale,mission.zoneLength*scale); c.fillStyle=c.strokeStyle; c.font='13px monospace'; c.fillText(mission.side===1?'E–02':'W–02',tx-50,ty-20);
+        const [x,y]=project(s.x,s.y); c.save(); c.translate(x,y); c.rotate(s.heading); c.beginPath();c.moveTo(0,-VESSEL.length);c.lineTo(-VESSEL.beam,VESSEL.length*.7);c.lineTo(VESSEL.beam,VESSEL.length*.7);c.closePath();c.fillStyle='#f1f2db';c.fill();c.restore();
         c.fillStyle='#9bd1c5';c.fillText('N ↑   7.2 m · CARTA SINTÉTICA',18,320);
     }
     dispose() { for(const d of this.displays) d.texture.dispose(); }

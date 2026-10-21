@@ -9,9 +9,9 @@ import {MISSIONS,createHarbor,PORT} from '../src/simulator/world/harbor.js';
 import {playerMoorings,decorativeMoorings} from '../src/simulator/world/moorings.js';
 import {DockingMission} from '../src/simulator/missions/docking.js';
 
-test('harbour update: navigation forces, contacts and keyboard controller remain byte-for-byte unchanged',async()=>{
+test('harbour update: navigation forces and keyboard controller unchanged; only yacht collision dimensions differ',async()=>{
     const expected={'physics/vessel.js':'2dbcd959b074153c6b213552b36fd9465539d96d98aa22e700487dcef747be79','physics/collisions.js':'ec1e43dfb8c6a552d5045bd33ede1d7ecb6ff1f31f93784ae52f9cf39c1946ce','services/controls.js':'e49c0d694df8a8e64aba0206866038a86637de1dbfc4e106a76234220d8adaf2'};
-    for(const [file,hash]of Object.entries(expected))assert.equal(createHash('sha256').update(await readFile('src/simulator/'+file)).digest('hex'),hash,file);
+    for(const [file,hash]of Object.entries(expected)){let source=await readFile('src/simulator/'+file,'utf8');if(file==='physics/vessel.js')source=source.replace('// SI units. Aurea 24 geometry; preserved training actuators/forces, see docs/SUPERYACHT.md.','// SI units. Fictional PW-20 harbour-training configuration; see docs/NAUTICAL_DESIGN.md.').replace('length: 24, beam: 6.2','length: 19.2, beam: 5.3');assert.equal(createHash('sha256').update(source).digest('hex'),hash,file);}
 });
 test('harbour update: the same engine and rudder sequence reproduces the 3.0 trajectory',async()=>{
     const {samples}=JSON.parse(await readFile('tests/fixtures/navigation-baseline.json','utf8')),s=createState({x:0,y:0}),env={wind:{x:2,y:-1},current:{x:.1,y:.05}};
@@ -24,14 +24,14 @@ test('harbour update: red/yellow/green and actual mooring permission use the sam
     const m=MISSIONS[0],s=createState({x:m.targetX,y:m.targetY}),h=createHarbor(m),progress=new DockingMission(m,h);
     const cue=()=>dockingCue(dockingMetrics(s,m),progress,m);
     assert.equal(dockingCue(dockingMetrics(createState(h.start),m),progress,m).color,'red');
-    progress.entered=true;s.x=54;s.heading=20*Math.PI/180;assert.equal(cue().color,'yellow');assert.equal(cue().ready,false);
+    progress.entered=true;s.x=PORT.quayX-8;s.heading=20*Math.PI/180;assert.equal(cue().color,'yellow');assert.equal(cue().ready,false);
     s.x=m.targetX;s.heading=0;s.u=.9;assert.equal(cue().color,'red');s.u=.4;assert.equal(cue().color,'yellow');s.u=0;s.port.lever=.2;assert.equal(cue().color,'yellow');s.port.lever=0;
     progress.update(s,1.5);assert.equal(cue().color,'yellow');assert.equal(progress.requestMooring(s),false);
     progress.update(s,.6);assert.equal(cue().color,'green');assert.equal(cue().ready,true);assert.match(cue().title,/POSICIÓN CORRECTA/);assert.equal(progress.lines.length,0,'green never attaches lines automatically');assert.equal(progress.requestMooring(s),true);assert.equal(cue().ready,false);assert.equal(cue().color,'green');
     s.v=.5;progress.update(s,1/60);assert.equal(cue().ready,false);assert.notEqual(cue().color,'green');assert.equal(progress.lines.length,0);
 });
 test('harbour update: easy berths are permissive in position but still reject unsafe motion',()=>{
-    const m=MISSIONS[0],s=createState({x:53,y:m.targetY+7,heading:12*Math.PI/180});assert.ok(dockingMetrics(s,m).safe);s.u=.5;assert.equal(dockingMetrics(s,m).safe,false);s.u=0;s.r=.03;assert.equal(dockingMetrics(s,m).safe,false);assert.ok(dockingLimits(m).angleDeg>dockingLimits(MISSIONS[3]).angleDeg);
+    const m=MISSIONS[0],s=createState({x:PORT.quayX-9.5,y:m.targetY+7,heading:12*Math.PI/180});assert.ok(dockingMetrics(s,m).safe);s.u=.5;assert.equal(dockingMetrics(s,m).safe,false);s.u=0;s.r=.03;assert.equal(dockingMetrics(s,m).safe,false);assert.ok(dockingLimits(m).angleDeg>dockingLimits(MISSIONS[3]).angleDeg);
 });
 test('harbour update: easy approach water remains clear of stationary boats and gangways',()=>{
     for(const m of MISSIONS.slice(0,2)){const h=createHarbor(m);assert.ok(h.start.y>-120);for(const b of h.boxes.filter(b=>b.kind==='boat'||b.kind==='pier')){
@@ -40,7 +40,7 @@ test('harbour update: easy approach water remains clear of stationary boats and 
 });
 test('harbour update: player lines start at actual cleats and lead outwards to real shore bollards',()=>{
     for(const m of MISSIONS.slice(0,3))for(const heading of [-.15,0,.15]){
-        const s=createState({x:m.side*55,y:m.targetY,heading}),h=createHarbor(m),lines=playerMoorings(s,m,h.bollards),a=axes(heading);assert.equal(lines.length,6);
+        const s=createState({x:m.side*(PORT.quayX-7),y:m.targetY,heading}),h=createHarbor(m),lines=playerMoorings(s,m,h.bollards),a=axes(heading);assert.equal(lines.length,6);
         for(const line of lines){assert.ok(h.bollards.includes(line.shore));const p=bodyPoint(s,line.forward,line.starboard),dx=line.shore.x-p.x,dy=line.shore.y-p.y;assert.ok((dx*a.sx+dy*a.sy)*m.side>0);assert.ok(Math.abs(line.shore.x)>PORT.quayX);}
     }
 });

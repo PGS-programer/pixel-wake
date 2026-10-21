@@ -1,7 +1,7 @@
 import { bodyPoint, axes } from '../physics/vessel.js';
 export const PLAYER_CLEATS = [
-    { forward: 6.5, across: 2.05 }, { forward: -7, across: 2.2 },
-    { forward: 3, across: 2.45 }, { forward: -3, across: 2.45 },
+    { forward: 8, across: 2.4 }, { forward: -9, across: 2.65 },
+    { forward: 3.6, across: 2.92 }, { forward: -3.6, across: 2.92 },
 ];
 // Choose real shore fittings with an outward lead, so ropes don't cut through the deck.
 export function playerMoorings(state, mission, bollards) {

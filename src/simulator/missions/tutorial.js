@@ -10,9 +10,9 @@ export class Tutorial {
             ['Máquina atrás','Mantén S y L. El engranaje pasa por neutral y espera antes de invertir. Es frenado por empuje, no un freno instantáneo.',s.port.shaft<-.12&&s.starboard.shaft<-.12],
             ['Timón y flujo','Pon N. Usa ← o → hasta al menos 6°. ↑ ordena volver a la vía. Sin flujo, el timón por sí solo no hace girar el barco.',this.rudderMoved&&Math.abs(s.rudder)<.025&&Math.abs(s.rudderOrder)<.01],
             ['Maniobra con dos hélices','Da un poco de W y L: babor avante, estribor atrás. Observa el giro. Usa N al terminar.',s.port.shaft>.12&&s.starboard.shaft<-.12],
-            ['Rumbo a la bocana','Ordena N, timón a la vía y avante igual en ambas bandas. Al entrar desde el mar: roja a babor, verde a estribor. Usa la carta para planear el giro.',mission.entered],
-            ['Aproximación al muelle','El recuadro dorado señala tu puesto. Reduce antes de llegar. Controla SOG y la distancia de banda; 2/3 permiten asomarte.',mission.phase==='posicionamiento'],
-            ['Prepara el amarre','Queda paralelo, a menos de 3,5 m y casi detenido. Ambos mandos en neutral; mantén la posición 3 s. Pulsa M cuando se autorice.',mission.lines.length>0],
+            ['Tu puesto está cerca','Ya estás dentro de la marina. La flecha y la baliza señalan tu amarre; usa pequeños impulsos para corregir rumbo y acercarte.',mission.entered],
+            ['Aproximación al muelle','La zona translúcida señala tu puesto. Reduce antes de llegar. Controla SOG y la distancia de banda; 2/3 permiten asomarte.',mission.phase==='posicionamiento'],
+            ['Prepara el amarre',`Queda paralelo, a ${mission.config.docking.minGap}–${mission.config.docking.maxGap} m y casi detenido. Ambos mandos en N durante ${mission.config.docking.hold} s. Pulsa M cuando la zona se vuelva verde.`,mission.lines.length>0],
             ['Tripulación trabajando','Los largos, esprines y traveses se aseguran en sus bolardos. Conserva la posición segura hasta terminar.',mission.finished],
         ];
         if(steps[this.index]?.[2]&&this.index<steps.length-1)this.index++;

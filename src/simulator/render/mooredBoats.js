@@ -4,6 +4,7 @@ import { box, cylinder, tube } from './primitives.js';
 import { batchStatic } from './batching.js';
 import { bodyPoint } from '../physics/vessel.js';
 import { RopeBundle } from './ropes.js';
+import {yachtHullGeometry,softBox} from './yachtGeometry.js';
 function hullGeometry(length, beam) {
     const stations = [[-.5,.78],[-.35,.98],[0,1],[.27,.84],[.43,.4],[.5,.015]], vertices = [], uvs = [], indices = [];
     for (let i=0;i<stations.length;i++) {
@@ -18,7 +19,8 @@ function hullGeometry(length, beam) {
 export function createMooredBoat(scene, boat, m) {
     const root=new THREE.Group();root.position.set(boat.x,0,-boat.y);root.rotation.y=-boat.heading;scene.add(root);
     const {length:l,beam:b}=boat, paint=new THREE.MeshStandardMaterial({color:boat.color,roughness:.4,metalness:.12});
-    const hull=new THREE.Mesh(hullGeometry(l,b*.92),paint);hull.castShadow=hull.receiveShadow=true;root.add(hull);
+    const geometry=boat.type==='yacht'?yachtHullGeometry(l,b*.92):hullGeometry(l,b*.92);if(boat.type==='yacht')geometry.scale(1,.62,1);
+    const hull=new THREE.Mesh(geometry,paint);hull.castShadow=hull.receiveShadow=true;root.add(hull);
     box(root,0,1.03,0,b*.75,.08,l*.68,m.wood);
     for(const side of [-1,1])tube(root,[[side*b*.36,1.18,l*.43],[side*b*.46,1.24,0],[side*b*.3,1.3,-l*.35],[0,1.35,-l*.48]],.035,m.white);
     if(boat.type==='sail') {
@@ -28,6 +30,15 @@ export function createMooredBoat(scene, boat, m) {
         tube(root,[[0,2.1,-l*.05],[0,2.1,l*.27]],.1,m.canopy);
         for(const side of [-1,1])tube(root,[[side*b*.43,1.1,0],[0,l*.85,-l*.05],[0,1.2,-l*.44]],.012,m.iron);
         box(root,0,1.2,l*.29,b*.63,.12,l*.18,m.navy);
+    } else if(boat.type==='yacht'){
+        softBox(root,0,1.5,-l*.02,b*.72,.9,l*.52,m.white,.4);
+        softBox(root,0,1.75,-l*.03,b*.74,.48,l*.48,m.glass,.3);
+        softBox(root,0,2.12,-l*.02,b*.8,.14,l*.56,m.white,.4);
+        softBox(root,0,2.35,-l*.07,b*.52,.4,l*.25,m.glass,.2);
+        softBox(root,0,2.62,-l*.07,b*.62,.12,l*.3,m.white,.3);
+        softBox(root,0,1.32,l*.3,b*.61,.18,l*.18,m.canopy,.2);
+        softBox(root,0,1.28,-l*.35,b*.48,.16,l*.17,m.canopy,.2);
+        cylinder(root,0,2.9,0,.03,.55,m.metal,8);
     } else {
         const fishing=boat.type==='fishing',work=boat.type==='work';
         box(root,0,1.58,-l*.11,b*.67,1.1,l*(work?.37:.28),m.cream);

@@ -1,5 +1,7 @@
 # Puerto mediterráneo · versión 3.1
 
+Informe histórico. La versión 3.2 sustituye el barco, la distribución de la marina y los inicios de misión: [Aurea 24](SUPERYACHT.md).
+
 21 de octubre de 2026. Actualización sobre el simulador existente de `5ac1661`.
 
 ## Navegación conservada y suavidad

@@ -4,7 +4,7 @@ import { playerMoorings } from '../world/moorings.js';
 import { dockingMetrics, dockingLimits } from './berth.js';
 export { dockingMetrics } from './berth.js';
 export class DockingMission {
-    constructor(config, harbor) { this.config = config; this.harbor = harbor; this.phase = 'entrada'; this.entered = false; this.safeTime = 0; this.lines = []; this.mooringTime = 0; this.finished = false; this.lastImpacts = new Map(); this.stats = { maxFinalSpeed: 0, maxContact: 0, collisions: 0, severe: 0, fenderContacts: 0, reversals: 0, engineEffort: 0 }; this.signs = [0, 0]; }
+    constructor(config, harbor) { this.config = config; this.harbor = harbor; this.entered = harbor.start.y > PORT.entryY && Math.abs(harbor.start.x) < PORT.quayX - VESSEL.beam / 2 && harbor.start.y < PORT.northY - VESSEL.length / 2; this.phase = this.entered ? 'aproximación' : 'entrada'; this.safeTime = 0; this.lines = []; this.mooringTime = 0; this.finished = false; this.lastImpacts = new Map(); this.stats = { maxFinalSpeed: 0, maxContact: 0, collisions: 0, severe: 0, fenderContacts: 0, reversals: 0, engineEffort: 0 }; this.signs = [0, 0]; }
     update(s, dt, impacts = []) {
         if (this.finished) return;
         if (!this.entered && s.y > PORT.entryY && Math.abs(s.x) < PORT.entranceHalfWidth) this.entered = true;

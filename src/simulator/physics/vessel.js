@@ -1,6 +1,6 @@
-// SI units. Fictional PW-20 harbour-training configuration; see docs/NAUTICAL_DESIGN.md.
+// SI units. Aurea 24 geometry; preserved training actuators/forces, see docs/SUPERYACHT.md.
 export const VESSEL = Object.freeze({
-    length: 19.2, beam: 5.3, draft: 1.8, mass: 60000,
+    length: 24, beam: 6.2, draft: 1.8, mass: 60000,
     surgeMass: 66000, swayMass: 96000, yawInertia: 2300000,
     shaftOffset: 1.65, thrustAhead: 18000, thrustAstern: 11500,
     engineLag: 1.6, gearboxDelay: 0.9, leverRate: 0.38,

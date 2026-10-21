@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Water } from 'three/addons/objects/Water.js';
-import { createVessel } from './bridge.js';
+import { createVessel, HELM_EYE } from './bridge.js';
 import { createHarborView } from './harborView.js';
 import { Instruments } from './instruments.js';
 import { bodyPoint } from '../physics/vessel.js';
@@ -14,11 +14,11 @@ const skyFragment=`
     float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}
     void main(){
         vec3 d=normalize(direction);float h=pow(max(0.0,d.y),0.45);
-        vec3 color=mix(vec3(0.54,0.66,0.68),vec3(0.10,0.34,0.59),h);
+        vec3 color=mix(vec3(0.66,0.77,0.80),vec3(0.13,0.37,0.65),h);
         vec2 p=d.xz/(max(.02,d.y)+.3)*3.0+vec2(time*.0015,0);
         float clouds=noise(p)*.6+noise(p*2.05)*.27+noise(p*4.1)*.13;
         float alpha=smoothstep(.57,.78,clouds)*smoothstep(.04,.32,d.y)*.7;
-        color=mix(color,vec3(.88,.85,.76),alpha);
+        color=mix(color,vec3(.95,.94,.89),alpha);
         float glow=pow(max(0.0,dot(d,sun)),90.0),disc=pow(max(0.0,dot(d,sun)),1800.0);
         color+=vec3(.5,.36,.18)*glow+vec3(3.0,2.6,1.9)*disc;
         gl_FragColor=vec4(color,1.0);
@@ -32,7 +32,7 @@ export class SimulatorRenderer {
         this.renderer=new THREE.WebGLRenderer({antialias:!this.low,powerPreference:'high-performance'});
         this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.low?1:1.6));this.renderer.setClearColor('#b9cfce');
         this.renderer.shadowMap.enabled=!this.low;this.renderer.shadowMap.type=THREE.PCFShadowMap;
-        this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=.9;
+        this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=.98;
         this.renderer.domElement.setAttribute('aria-label','Puente de mando tridimensional y puerto navegable');this.renderer.domElement.setAttribute('tabindex','0');parent.append(this.renderer.domElement);
         this.scene=new THREE.Scene();this.scene.fog=new THREE.FogExp2('#b9cecb',.0014);
         this.camera=new THREE.PerspectiveCamera(65,1,.05,1400);this.camera.rotation.order='YXZ';
@@ -40,13 +40,14 @@ export class SimulatorRenderer {
         const sun=new THREE.DirectionalLight('#ffe2b7',3.0);sun.position.set(-85,150,-90);sun.castShadow=!this.low;
         sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-90,right:90,top:140,bottom:-140,far:460});sun.shadow.bias=-.0005;sun.shadow.normalBias=.04;sun.shadow.radius=2;this.scene.add(sun);
         this.sky=new THREE.Mesh(new THREE.SphereGeometry(650,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{sun:{value:sun.position.clone().normalize()},time:{value:0}},vertexShader:skyVertex,fragmentShader:skyFragment}));this.scene.add(this.sky);
-        const environment=new THREE.PMREMGenerator(this.renderer);this.environment=environment.fromScene(this.sky,.05);this.scene.environment=this.environment.texture;this.scene.environmentIntensity=.32;environment.dispose();
+        const environment=new THREE.PMREMGenerator(this.renderer);this.environment=environment.fromScene(this.sky,.05);this.scene.environment=this.environment.texture;this.scene.environmentIntensity=.5;environment.dispose();
         const size=128,data=new Uint8Array(size*size*4);
-        for(let y=0;y<size;y++)for(let x=0;x<size;x++){const i=(y*size+x)*4,nx=Math.sin(x*.31+y*.13)*.12+Math.cos(y*.49+x*.1)*.07,ny=Math.cos(x*.19-y*.37)*.13+Math.sin(x*.51+y*.29)*.04;data[i]=128+nx*127;data[i+1]=128+ny*127;data[i+2]=251;data[i+3]=255;}
-        this.normals=new THREE.DataTexture(data,size,size);this.normals.wrapS=this.normals.wrapT=THREE.RepeatWrapping;this.normals.needsUpdate=true;
+        const waves=[[8,3,.075],[4,11,.05],[13,-7,.04],[17,13,.025],[23,-19,.012]];
+        for(let y=0;y<size;y++)for(let x=0;x<size;x++){let nx=0,ny=0;for(const [a,b,strength]of waves){const phase=(a*x+b*y)/size*Math.PI*2+a*.7,scale=strength/Math.hypot(a,b);nx+=Math.cos(phase)*a*scale;ny+=Math.cos(phase)*b*scale;}const i=(y*size+x)*4;data[i]=128+nx*127;data[i+1]=128+ny*127;data[i+2]=254;data[i+3]=255;}
+        this.normals=new THREE.DataTexture(data,size,size);this.normals.wrapS=this.normals.wrapT=THREE.RepeatWrapping;this.normals.generateMipmaps=true;this.normals.minFilter=THREE.LinearMipmapLinearFilter;this.normals.magFilter=THREE.LinearFilter;this.normals.anisotropy=4;this.normals.needsUpdate=true;
         if(!this.low){
-            this.water=new Water(new THREE.PlaneGeometry(1400,1400),{textureWidth:512,textureHeight:512,waterNormals:this.normals,sunDirection:sun.position.clone().normalize(),sunColor:'#ffebce',waterColor:'#258387',distortionScale:.75,fog:true});
-            this.water.material.uniforms.size.value=2.7;
+            this.water=new Water(new THREE.PlaneGeometry(1400,1400),{textureWidth:512,textureHeight:512,waterNormals:this.normals,sunDirection:sun.position.clone().normalize(),sunColor:'#ffebce',waterColor:'#1d797c',distortionScale:.55,fog:true});
+            this.water.material.uniforms.size.value=3.8;
             this.water.material.fragmentShader=this.water.material.fragmentShader.replace('vec3 scatter = max( 0.0, dot( surfaceNormal, eyeDirection ) ) * waterColor;', 'float variation=sin(worldPosition.x*.032+worldPosition.z*.043)*.035; vec3 localWater=waterColor+vec3(variation*.15,variation*.55,variation*.45); vec3 scatter=max(0.0,dot(surfaceNormal,eyeDirection))*localWater;');
         }else this.water=new THREE.Mesh(new THREE.PlaneGeometry(1400,1400),new THREE.MeshStandardMaterial({color:'#3b8a90',roughness:.3,metalness:.2,normalMap:this.normals,normalScale:new THREE.Vector2(.2,.2)}));
         this.water.rotation.x=-Math.PI/2;this.water.position.y=-.03;this.scene.add(this.water);
@@ -70,9 +71,9 @@ export class SimulatorRenderer {
         if(this.water.material.uniforms?.time)this.water.material.uniforms.time.value=t*.36;else {this.normals.offset.x=t*.0018;this.normals.offset.y=t*.0011;}
         this.harborView.update(t);this.berth.update(metrics,mission,t);
         if(this.elapsed>.1){this.instruments.update(s,this.harbor,mission.config,metrics,mission);this.elapsed=0;}
-        if(this.view==='external'){const pos=bodyPoint(s,-26,-23);this.camera.position.set(pos.x,18,-pos.y);this.camera.lookAt(s.x,1,-s.y);}
+        if(this.view==='external'){const pos=bodyPoint(s,-30,-26);this.camera.position.set(pos.x,20,-pos.y);this.camera.lookAt(s.x,2,-s.y);if(this.camera.fov!==65){this.camera.fov=65;this.camera.updateProjectionMatrix();}}
         else{
-            const local=new THREE.Vector3(this.view==='port'?-1.85:this.view==='starboard'?1.85:0,4.65,this.zoom?-.25:2.35);ship.localToWorld(local);this.camera.position.copy(local);
+            const local=new THREE.Vector3(this.view==='port'?-HELM_EYE.wing:this.view==='starboard'?HELM_EYE.wing:0,HELM_EYE.height,this.zoom?HELM_EYE.zoomZ:HELM_EYE.z);ship.localToWorld(local);this.camera.position.copy(local);
             // The eye follows the interpolated hull; roll/pitch are mostly compensated like a stable head.
             this.camera.rotation.set(this.look.pitch+ship.rotation.x*.2,-s.heading+this.look.yaw,ship.rotation.z*.15,'YXZ');
             const wanted=this.zoom?42:65;if(this.camera.fov!==wanted){this.camera.fov=wanted;this.camera.updateProjectionMatrix();}
@@ -83,7 +84,7 @@ export class SimulatorRenderer {
         if(dt>0&&dt<.15)this.framePeriods.push(dt*1000);this.renderTimes.push(performance.now()-start);if(this.framePeriods.length>180)this.framePeriods.shift();if(this.renderTimes.length>180)this.renderTimes.shift();
         if(++this.statsFrame%15===0){const sorted=[...this.framePeriods].sort((a,b)=>a-b);this.stats={fps:1000/(this.framePeriods.reduce((a,b)=>a+b,0)/(this.framePeriods.length||1)),p95ms:sorted[Math.floor(sorted.length*.95)]||0,cpuMs:this.renderTimes.reduce((a,b)=>a+b,0)/this.renderTimes.length,calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,samples:this.framePeriods.length};}
     }
-    updateRopes(lines){this.playerRopes.update(Array.from({length:6},(_,i)=>{const l=lines[i];if(!l?.secured)return null;const point=new THREE.Vector3(l.starboard,1.6,-l.forward);this.vessel.root.localToWorld(point);return{a:point,b:new THREE.Vector3(l.shore.x,1.47,-l.shore.y)};}));}
+    updateRopes(lines){this.playerRopes.update(Array.from({length:6},(_,i)=>{const l=lines[i];if(!l?.secured)return null;const point=new THREE.Vector3(l.starboard,1.86,-l.forward);this.vessel.root.localToWorld(point);return{a:point,b:new THREE.Vector3(l.shore.x,1.47,-l.shore.y)};}));}
     dispose(){
         this.observer.disconnect();this.instruments.dispose();const textures=new Set(),geometries=new Set(),materials=new Set();this.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of o.material?(Array.isArray(o.material)?o.material:[o.material]):[]){materials.add(m);for(const v of Object.values(m))if(v?.isTexture)textures.add(v);}});textures.forEach(t=>t.dispose());geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());this.normals.dispose();this.environment.dispose();this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();
     }

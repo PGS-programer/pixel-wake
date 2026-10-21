@@ -28,3 +28,4 @@
 @media(max-width:550px) { .sim-objective { top:65px; width:calc(100% - 24px); max-width:none; }.sim-objective p { margin:5px 0; }.sim-target-guide { top:175px; width:auto; max-width:95vw; font-size:8px; }.sim-views { top:220px; bottom:auto; align-items:start; }.sim-tutorial { top:310px; }.sim-berth-state { right:12px; left:12px; width:auto; bottom:270px; }.sim-hud.show-controls .sim-berth-state { top:auto; bottom:275px; } }
 @media(max-height:500px) and (min-width:551px) { .sim-hud.show-controls .sim-tutorial { right:246px; top:104px; width:190px; max-height:75px; overflow:auto; } }
 @media(pointer:coarse) and (max-height:500px) and (min-width:551px) { .sim-berth-state { bottom:auto; top:104px; }.sim-tutorial { right:246px; top:104px; width:190px; max-height:75px; overflow:auto; } }
+@media(max-height:500px) { .sim-objective { max-height:105px; overflow:auto; } }

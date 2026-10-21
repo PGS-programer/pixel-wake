@@ -2,9 +2,9 @@
 
 [Jugar online](https://pgs-programer.github.io/pixel-wake/) · [Repositorio](https://github.com/PGS-programer/pixel-wake) · [Despliegue y SEO](docs/DEPLOYMENT.md)
 
-**Versión 3.1 — Puerto mediterráneo:** el inicio permite elegir entre el arcade original y un simulador de atraque 3D en primera persona. El simulador incorpora un puerto compacto, embarcaciones amarradas, guía de atraque por colores y movimiento visual interpolado. El arcade conserva perfiles, ranking, garaje, combos, guardados y 1v1. El simulador funciona sin backend y usa una clave de progreso independiente. [Actualización del puerto y pruebas](docs/MEDITERRANEAN_HARBOR.md) · [Diseño naval, fuentes y límites](docs/NAUTICAL_DESIGN.md) · [Verificación inicial del simulador](docs/SIMULATOR_RELEASE.md).
+**Versión 3.2 — Aurea 24:** un yate de 24 m con cubiertas escalonadas, puente refinado y una marina compacta. Las misiones empiezan dentro de la dársena; el primer amarre está a unos 32 m y conserva la guía roja/amarilla/verde y la orden manual. El arcade conserva perfiles, ranking, garaje, combos, guardados y 1v1. El simulador funciona sin backend y usa una clave de progreso independiente. [Yate, maniobras y verificación actual](docs/SUPERYACHT.md) · [Puerto 3.1](docs/MEDITERRANEAN_HARBOR.md) · [Modelo naval original y fuentes](docs/NAUTICAL_DESIGN.md).
 
-Plataforma marítima hecha con JavaScript, Phaser 4.0.0, Three.js 0.186.1 y Vite. El arcade sigue navegando por la Costa Esmeralda, recogiendo monedas y encadenando pasos cercanos. Sus barcos y estelas siguen siendo cosméticos: comprar nunca cambia velocidad ni hitbox. El nuevo PW–20 permite practicar maniobras aproximadas de doble hélice; no es una herramienta de navegación real.
+Plataforma marítima hecha con JavaScript, Phaser 4.0.0, Three.js 0.186.1 y Vite. El arcade sigue navegando por la Costa Esmeralda, recogiendo monedas y encadenando pasos cercanos. Sus barcos y estelas siguen siendo cosméticos: comprar nunca cambia velocidad ni hitbox. Aurea 24 permite practicar maniobras aproximadas de doble hélice; no es una herramienta de navegación real.
 
 ## Ejecutar
 
@@ -30,7 +30,7 @@ npm run build # salida estática en dist/
 
 ### Simulador de atraque
 
-En el centro náutico, selecciona **Al mando del puente → Primer atraque**. El barco empieza fuera del puerto. Sigue la práctica guiada y la carta; entra entre roja a babor y verde a estribor, gira dentro de la dársena y aproxima al puesto E–02 por estribor. No hay piloto automático en el juego.
+En el centro náutico, selecciona **Al mando del puente → Primer atraque**. Empiezas dentro de la marina, a unos 32 m del puesto E–02 por estribor. La embarcación está algo oblicua: corrige pronto el rumbo, ajusta los dos motores y reduce antes de la alineación final. No hay tramo previo de mar abierto ni piloto automático en el juego.
 
 | Acción | Control |
 | --- | --- |
